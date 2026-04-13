@@ -2,8 +2,8 @@
 Benchmark WiLoR inference (full repo, not wilor_mini): detector + ViTDetDataset + model.
 
 Uses the same stack as Desktop WiLoR run_realtime.py / demo.py. Set WILOR_ROOT to your
-clone (defaults to C:\\Users\\MAD\\Desktop\\exo\\WiLoR). Run from any cwd; video path
-defaults to cam_test.mov next to this script unless WILOR_VIDEO is set.
+WiLoR repo root (contains wilor/ and pretrained_models/). Default: wilor_realtime/WiLoR
+next to this script. Video: cam_test.mov beside this script unless WILOR_VIDEO is set.
 """
 import os
 import sys
@@ -16,7 +16,8 @@ import torch
 
 # --- paths: resolve video before chdir(WILOR_ROOT) ---
 _here = Path(__file__).resolve().parent
-WILOR_ROOT = Path(os.environ.get("WILOR_ROOT", r"C:\Users\MAD\Desktop\exo\WiLoR")).resolve()
+_default_root = _here / "wilor_realtime" / "WiLoR"
+WILOR_ROOT = Path(os.environ.get("WILOR_ROOT", str(_default_root))).expanduser().resolve()
 _raw_video = os.environ.get("WILOR_VIDEO", str(_here / "cam_test.mov"))
 VIDEO_PATH = str(Path(_raw_video).expanduser().resolve())
 
