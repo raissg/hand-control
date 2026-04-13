@@ -1,0 +1,10 @@
+# On macOS / Apple Silicon, `pip install pybullet` usually fails: PyPI only
+# ships pybullet wheels for manylinux x86_64, so pip compiles Bullet and clang
+# errors are common. Use conda-forge instead:
+#   conda env create -f environment.yml
+#   conda activate handcontrol
+#
+# On Linux x86_64 you can add:  pip install pybullet
+mediapipe==0.10.33
+opencv-python==4.13.0.92
+numpy>=1.26.4

@@ -1,0 +1,48 @@
+# OS / editor
+.DS_Store
+.cursor/
+.claude/
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.venv/
+venv/
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large / generated — do not push to GitHub
+wilor_realtime/WiLoR/pretrained_models/*.ckpt
+wilor_realtime/WiLoR/pretrained_models/*.pt
+wilor_realtime/WiLoR/pretrained_models/.cache/
+*.mov
+*.mp4
+*.avi
+
+# emg2pose local runs / scrapes
+emg2pose/logs/
+emg2pose/apple_jobs_html/
+
+# Large notebooks (embedded outputs)
+emg2pose/notebooks/
+
+# Huggingface / model caches inside repo
+**/.cache/huggingface/
+
+# Local recordings
+naviflame/recordings/*.csv
+naviflame/recordings/*.pkl

@@ -1,0 +1,597 @@
+<?xml version="1.0"?>
+<robot name="inmoov_right_hand">
+
+  <material name="frame_color">
+    <color rgba="0.4 0.4 0.4 1"/>
+  </material>
+  <material name="cover_color">
+    <color rgba="0.75 0.75 0.75 1"/>
+  </material>
+
+  <!-- Base link (fixed world frame) -->
+  <link name="base_link">
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="base_to_hand_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="r_hand_link"/>
+  </joint>
+
+  <!-- ==================== PALM ==================== -->
+  <link name="r_hand_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_hand.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== THUMB ==================== -->
+  <link name="r_thumb1_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_thumb5_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_thumb2_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/thumb5_2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_thumb3_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/thumb5_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- thumb1_joint: mimic of thumb_joint, Z-axis, multiplier=0.75 -->
+  <joint name="r_thumb1_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.1345" velocity="1.0"/>
+    <origin rpy="0.1 0 0" xyz="0 0.029 -0.0577"/>
+    <parent link="r_hand_link"/>
+    <child link="r_thumb1_link"/>
+  </joint>
+
+  <!-- thumb_joint: CONTROL joint, Y-axis -->
+  <joint name="r_thumb_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.1345" velocity="1.0"/>
+    <origin rpy="0.825 -0.1 0.3" xyz="-0.00052 0.02725 -0.013"/>
+    <parent link="r_thumb1_link"/>
+    <child link="r_thumb2_link"/>
+  </joint>
+
+  <!-- thumb3_joint: mimic of thumb_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_thumb3_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.1345" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.035"/>
+    <parent link="r_thumb2_link"/>
+    <child link="r_thumb3_link"/>
+  </joint>
+
+  <!-- ==================== INDEX ==================== -->
+  <link name="r_index1_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/index3_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_index2_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/index3_2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_index3_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/index3_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- index1_joint: mimic of index_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_index1_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0.1 0 0" xyz="-0.0015 0.0342 -0.119"/>
+    <parent link="r_hand_link"/>
+    <child link="r_index1_link"/>
+  </joint>
+
+  <!-- index_joint: CONTROL joint, Y-axis -->
+  <joint name="r_index_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0.001 -0.03595"/>
+    <parent link="r_index1_link"/>
+    <child link="r_index2_link"/>
+  </joint>
+
+  <!-- index3_joint: mimic of index_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_index3_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.024"/>
+    <parent link="r_index2_link"/>
+    <child link="r_index3_link"/>
+  </joint>
+
+  <!-- ==================== MIDDLE ==================== -->
+  <link name="r_middle1_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/middle3_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_middle2_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/middle3_2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_middle3_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/middle3_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- middle1_joint: mimic of middle_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_middle1_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="-0.00175 0.007 -0.12325"/>
+    <parent link="r_hand_link"/>
+    <child link="r_middle1_link"/>
+  </joint>
+
+  <!-- middle_joint: CONTROL joint, Y-axis -->
+  <joint name="r_middle_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0.000 -0.0389"/>
+    <parent link="r_middle1_link"/>
+    <child link="r_middle2_link"/>
+  </joint>
+
+  <!-- middle3_joint: mimic of middle_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_middle3_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0.0005 -0.0259"/>
+    <parent link="r_middle2_link"/>
+    <child link="r_middle3_link"/>
+  </joint>
+
+  <!-- ==================== RING ==================== -->
+  <link name="r_ring1_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_ring3_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_ring2_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/ring3_2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_ring3_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/ring3_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_ring4_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/ring3_4.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- ring1_joint: mimic of ring_joint, Z-axis, multiplier=-0.1 -->
+  <joint name="r_ring1_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0.7 0 0" xyz="0 -0.00705 -0.0794"/>
+    <parent link="r_hand_link"/>
+    <child link="r_ring1_link"/>
+  </joint>
+
+  <!-- ring_joint: CONTROL joint, Y-axis -->
+  <joint name="r_ring_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="-0.7775 0 0" xyz="0.00126 -0.0351 -0.0166"/>
+    <parent link="r_ring1_link"/>
+    <child link="r_ring2_link"/>
+  </joint>
+
+  <!-- ring3_joint: mimic of ring_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_ring3_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0.0005 -0.0345"/>
+    <parent link="r_ring2_link"/>
+    <child link="r_ring3_link"/>
+  </joint>
+
+  <!-- ring4_joint: mimic of ring_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_ring4_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0.0004 -0.0229"/>
+    <parent link="r_ring3_link"/>
+    <child link="r_ring4_link"/>
+  </joint>
+
+  <!-- ==================== PINKY ==================== -->
+  <link name="r_pinky1_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_pinky3_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_pinky2_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/pinky3_2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_pinky3_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/pinky3_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <link name="r_pinky4_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/pinky3_4.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="frame_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- pinky1_joint: mimic of pinky_joint, Z-axis, multiplier=-0.1 -->
+  <joint name="r_pinky1_joint" type="revolute">
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0.7 0 0" xyz="0 -0.0270 -0.0555"/>
+    <parent link="r_hand_link"/>
+    <child link="r_pinky1_link"/>
+  </joint>
+
+  <!-- pinky_joint: CONTROL joint, Y-axis -->
+  <joint name="r_pinky_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="-0.93 0 0" xyz="0 -0.046 -0.0228"/>
+    <parent link="r_pinky1_link"/>
+    <child link="r_pinky2_link"/>
+  </joint>
+
+  <!-- pinky3_joint: mimic of pinky_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_pinky3_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0.0005 -0.031"/>
+    <parent link="r_pinky2_link"/>
+    <child link="r_pinky3_link"/>
+  </joint>
+
+  <!-- pinky4_joint: mimic of pinky_joint, Y-axis, multiplier=1.0 -->
+  <joint name="r_pinky4_joint" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1000.0" lower="-0.0873" upper="1.4835" velocity="1.0"/>
+    <origin rpy="0 0 0" xyz="0 0.0004 -0.0208"/>
+    <parent link="r_pinky3_link"/>
+    <child link="r_pinky4_link"/>
+  </joint>
+
+  <!-- ==================== COVERS (cosmetic, fixed joints) ==================== -->
+  <link name="r_handcover_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_hand.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_handcover_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.009 0.0192 -0.0977"/>
+    <parent link="r_hand_link"/>
+    <child link="r_handcover_link"/>
+  </joint>
+
+  <link name="r_cover_thumb_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_thumb.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_cover_thumb_joint" type="fixed">
+    <origin rpy="0.05 0 0" xyz="0.01 0.02125 0.0047"/>
+    <parent link="r_thumb1_link"/>
+    <child link="r_cover_thumb_link"/>
+  </joint>
+
+  <link name="r_cover_index_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_index.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_cover_index_joint" type="fixed">
+    <origin rpy="0 0.05 0" xyz="0.0071 0 -0.012"/>
+    <parent link="r_index1_link"/>
+    <child link="r_cover_index_link"/>
+  </joint>
+
+  <link name="r_cover_middle_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_middle.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_cover_middle_joint" type="fixed">
+    <origin rpy="0 -0.05 0" xyz="0.0071 0 -0.012"/>
+    <parent link="r_middle1_link"/>
+    <child link="r_cover_middle_link"/>
+  </joint>
+
+  <link name="r_cover_handring_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_handring.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_cover_handring_joint" type="fixed">
+    <origin rpy="-0.7 0 0" xyz="0.009 -0.015 -0.0008"/>
+    <parent link="r_ring1_link"/>
+    <child link="r_cover_handring_link"/>
+  </joint>
+
+  <link name="r_cover_ring_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_ring.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_cover_ring_joint" type="fixed">
+    <origin rpy="0.1 -0.05 0" xyz="0.005 0 -0.011"/>
+    <parent link="r_ring2_link"/>
+    <child link="r_cover_ring_link"/>
+  </joint>
+
+  <link name="r_cover_handpinky_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_handpinky.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_cover_handpinky_joint" type="fixed">
+    <origin rpy="-0.7 0 0" xyz="0.01 -0.02025 -0.0071"/>
+    <parent link="r_pinky1_link"/>
+    <child link="r_cover_handpinky_link"/>
+  </joint>
+
+  <link name="r_cover_pinky_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/r_cover_pinky.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="cover_color"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="r_cover_pinky_joint" type="fixed">
+    <origin rpy="0.1 -0.05 0" xyz="0.005 0 -0.0105"/>
+    <parent link="r_pinky2_link"/>
+    <child link="r_cover_pinky_link"/>
+  </joint>
+
+</robot>

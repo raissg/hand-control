@@ -1,0 +1,13 @@
+# PyPI does not publish pybullet wheels for macOS (especially arm64), so pip
+# builds from source and often fails. Conda-forge ships prebuilt pybullet.
+name: handcontrol
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pybullet
+  - opencv
+  - numpy
+  - pip
+  - pip:
+      - mediapipe==0.10.33

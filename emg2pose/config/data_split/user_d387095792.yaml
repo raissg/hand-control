@@ -1,0 +1,35 @@
+# Fine-tuning split for user d387095792 (held-out user in mini dataset)
+# 22 sessions for training, 4 for validation, 4 for test
+train:
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-1_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-1_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-4_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-4_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-5_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-5_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-6_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-6_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-7_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-7_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-8_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-8_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-9_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-9_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-10_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-10_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-11_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-11_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-12_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-12_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-13_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-13_right
+val:
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-14_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-14_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-15_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-15_right
+test:
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-2_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-2_right
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-3_left
+- 2022-12-06-1670313600-e3096-cv-emg-pose-train@2-recording-3_right
