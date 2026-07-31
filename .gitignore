@@ -29,6 +29,10 @@ venv/
 wilor_realtime/WiLoR/pretrained_models/*.ckpt
 wilor_realtime/WiLoR/pretrained_models/*.pt
 wilor_realtime/WiLoR/pretrained_models/.cache/
+# Trial CSVs and screen recordings are machine-generated evidence. Keep the
+# directory local so repeated benchmark runs do not pollute source-control
+# status; copy selected evidence elsewhere when it is intentionally published.
+benchmark_results/
 *.mov
 *.mp4
 *.avi

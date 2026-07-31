@@ -3,6 +3,14 @@
 A simple, specific description of how EMG (and IMU) becomes 5 finger bits in
 real time, plus the reasoning behind each design choice.
 
+The diagram below shows `EMG5BitMulti`, the two-stream EMG+IMU model. The
+EMG-only `EMG5Bit` shares the same EMG branch but has its own three-layer head
+(`128 → 32 → 16 → 5`) instead of the fusion head.
+
+For the ground-up version of everything here — every layer defined from
+scratch, the full training loop, and the complete inference path — see
+`docs/neural-network-deep-dive.md`.
+
 ---
 
 ## 1. The problem we're solving
@@ -22,8 +30,13 @@ This drives an Arduino that moves 5 servos on a 3D-printed hand.
 MindRove armband
    │  500 Hz, 8 EMG ch + 6 IMU ch
    ▼
-[EMGStream]  thread-safe queue, real-time bandpass + notch filter
+[EMGStream]  thread-safe queue, raw samples (enable_filter=False live)
    │
+   ▼
+[Ring buffer 300 EMG samples]  bandpass + notch (filtfilt) applied to the
+   │                           whole buffer, then the last 100 sliced out.
+   │                           The 200-sample pad kills filtfilt edge
+   │                           transients so live input matches training.
    ▼
 [Rolling 200 ms window]    100 samples × 8 EMG    +   100 samples × 6 IMU
    │                             │
@@ -55,9 +68,10 @@ MindRove armband
        Linear(160→64) ReLU Dropout
             Linear(64→5)
                     │
-                    ▼  5 logits → 5 sigmoids → 5 independent probabilities
-            [Smoothing pipeline]
-       median K=9 → EMA(α=0.18) → hysteresis → min-consecutive → min-dwell
+                    ▼  5 logits
+            [Smoothing pipeline]   (operates in logit space)
+       median K=9 → EMA(α=0.18) → sigmoid → snap-to-pattern OR hysteresis
+                  → min-consecutive → min-dwell
                     │
                     ▼
             5 latched bits → Arduino over USB serial
@@ -69,9 +83,11 @@ MindRove armband
 
 ### a. EMG branch (1-D CNN)
 
-Three Conv1d → BatchNorm → ReLU stages, each with a small kernel (k=5) and
-2× downsampling, ending in global average pooling. Compresses 100 EMG
-samples × 8 channels into a single 128-D feature vector per window.
+Three Conv1d → BatchNorm → ReLU stages with a small kernel (k=5); the first
+two are followed by 2× max-pooling (100 → 50 → 25 timesteps) and the third by
+global average pooling. Compresses 100 EMG samples × 8 channels into a single
+128-D feature vector per window. Each position in the final feature map sees
+32 input samples (64 ms) before that global average.
 
 ### b. IMU branch (also 1-D CNN, smaller)
 
@@ -92,25 +108,44 @@ are bent in the data more often than others.
 ### e. Smoothing pipeline (inference only)
 
 ```
-raw probs → median(K=9) → EMA(α=0.18) → hysteresis(0.7/0.3) → bit
+raw logits → median(K=9) → EMA(α=0.18) → sigmoid → probs
+                ↓
+        snap to nearest canonical pattern   (with --snap)
+          OR per-bit hysteresis(0.7/0.3)    (without --snap)
                 ↓
         min_consecutive=3 frames same → commit
                 ↓
-        min_dwell_s=0.2 since last flip → publish to servos
+        min_dwell_s=0.2 held per finger → publish to servos
 ```
+
+Median and EMA both run on **logits**, not probabilities (`logit_ema=True` in
+`LIVE_INFERENCE_DEFAULTS`); the sigmoid is applied once afterwards. The median
+is unaffected by this choice since the sigmoid preserves order, but the EMA is:
+averaging in logit space avoids the sigmoid's compression at the extremes, so a
+run of confident frames carries the weight it should. Note that `on_thresh` /
+`off_thresh` are unused when `--snap` is on.
 
 ### f. Label remap (training time)
 
-Before training, the recorded 14 labeled patterns are collapsed onto 7:
+Before training, the 15 patterns of the original recording protocol
+(`dataset_bits.RECORDED_PATTERNS`) are collapsed onto 8:
 
 | Recorded | Remapped to |
 |---|---|
-| 00000, 11111, 10000, 01000, 11000, 01100, 11100 | (kept as-is) |
+| 00000, 11111, 10000, 01000, 00100, 11000, 01100, 11100 | (kept as-is) |
 | 10001 | 10000 |
 | 11001 | 11000 |
 | 01110, 01111, 10111, 11011, 11101 | 11111 |
 
-The model then only ever predicts one of the 7 canonical patterns.
+The model then only ever predicts one of the 8 canonical patterns, which is
+also the vocabulary `--snap` selects from.
+
+**Caveat.** `record_bits.DEFAULT_PATTERNS` has since been trimmed to 7
+patterns (`00000 11111 10000 01000 11000 01100 11100`) — the 15-pattern list
+survives only as a comment. `get_supported_patterns()` still derives its
+vocabulary from `RECORDED_PATTERNS`, so `--snap` can snap the output to
+`00100` (middle finger alone), a pattern the current recorder never captures
+and the model therefore has no data for.
 
 ---
 
@@ -158,9 +193,9 @@ combination from scratch. BCE-per-finger says "each finger has its own
 decision," shares features across fingers, and handles unseen multi-finger
 combinations more gracefully.
 
-### Why label remap (collapse 14 patterns to 7)
+### Why label remap (collapse 15 patterns to 8)
 
-Per-pattern val accuracy on the 14-pattern model showed half the patterns
+Per-pattern val accuracy on the 15-pattern model showed half the patterns
 were unreliable (under 90% exact-match). Most of those unreliable patterns
 were near-misses of a more stable canonical pattern (e.g. `01110` vs.
 `11111`). Remapping at load time:
@@ -171,7 +206,11 @@ were near-misses of a more stable canonical pattern (e.g. `01110` vs.
 3. Keeps the recordings untouched, so the remap can be turned on/off via
    a single flag.
 
-After remap, val mean per-bit accuracy went from 91.8% to **99.1%**.
+After remap, val mean per-bit accuracy went from 91.8% to **99.1%**. Part of
+that gain is the problem getting easier rather than the model getting better —
+distinguishing `01110` from `11111` is no longer asked of it, so it can no
+longer be wrong about it. That is a defensible product call for poses this
+hardware could not separate reliably, but it is not a pure modeling win.
 
 ### Why the smoothing pipeline (not just `prob > 0.5`)
 
@@ -180,14 +219,24 @@ threshold-hovering activations. Without smoothing the servos would judder.
 The pipeline trades latency for stability:
 
 - **Median (K=9)** — kills 1–2 frame spikes (e.g. `0.9, 0.1, 0.9` becomes
-  `0.9`). Robust to outliers.
-- **EMA (α=0.18)** — softens the remaining jitter; ~6-frame time constant.
+  `0.9`). Robust to outliers: 4 of the 9 frames can be arbitrarily wrong
+  without moving it.
+- **EMA (α=0.18, logit space)** — softens the remaining jitter; ~250 ms time
+  constant at the 50 ms hop.
 - **Hysteresis (0.7 / 0.3)** — wide dead zone prevents on/off chatter for
-  borderline activations.
-- **min_consecutive=3** — bit only flips after 3 frames of agreement.
-- **min_dwell_s=0.2** — once a bit flips, it can't flip again for 200 ms.
+  borderline activations. Replaced by snap-to-pattern when `--snap` is on.
+- **min_consecutive=3** — the whole 5-bit vector must be identical for 3
+  frames in a row before it is committed.
+- **min_dwell_s=0.2** — per finger, a *new* value must hold for 200 ms before
+  it is published. If the candidate flips back first, the timer restarts and
+  the published bit never moves.
 
 Each layer is independently tunable from the live CLI.
+
+The cost is latency. Rough worst case for one clean flip: ~100 ms (window)
++ ~250 ms (median) + ~250 ms (EMA) + ≤150 ms (min_consecutive) + 200 ms
+(min_dwell) ≈ **0.8–1.0 s**. `src/compare_smoothing.py` evaluates this trade
+on recorded validation segments instead of by feel.
 
 ### Why per-session norm stats embedded in the checkpoint
 
@@ -197,9 +246,11 @@ fatigue). The training pipeline computes per-channel mean/std from the
 stats are used to z-score live EMG so the model sees the input
 distribution it was trained on.
 
-### Why such a small model (~50k params)
+### Why such a small model (58k / 67k params)
 
-Two reasons:
+`EMG5Bit` has **57,893** parameters (53,152 in the conv stack, 4,741 in the
+head). `EMG5BitMulti` has **67,157** (53,152 EMG branch + 3,376 IMU branch +
+10,629 fusion head). Two reasons to keep it there:
 1. **Latency** — full forward pass is <1 ms on a laptop CPU. We can run
    at 20 Hz with headroom for filtering, smoothing, and serial I/O.
 2. **Data** — we have <30 minutes of recordings. A bigger model would
@@ -212,9 +263,10 @@ Two reasons:
 
 Worth being explicit about, so reviewers don't ask:
 
-- **No cross-session adaptation.** The model is trained offline; we don't
-  adapt to electrode drift or muscle fatigue during a live run. Every new
-  session starts from the same checkpoint.
+- **No cross-session adaptation at run time.** The model is trained offline;
+  we don't adapt to electrode drift or muscle fatigue during a live run.
+  Offline, `record_bits --calibrate` plus `train_bits --resume
+  --freeze-backbone` re-fits the head and norm stats to a new band session.
 - **No spatial filter on EMG.** The first Conv1d treats the 8 channels as
   input channels with one fully-connected mix per kernel position. A
   proper "spatial filter" stage (à la EEGNet) might squeeze out a few more
@@ -239,6 +291,10 @@ Worth being explicit about, so reviewers don't ask:
 | EMG+IMU two-stream model class | `src/binary_model.py` (`EMG5BitMulti`) |
 | Training loop, BCE + pos_weight | `src/train_bits.py` |
 | Dataset, segmenting, label remap | `src/dataset_bits.py` |
-| Live inference + smoothing pipeline | `src/live_binary.py` (`BinaryPredictor`) |
-| Live Arduino loop (this is the demo) | `hand_control_emg_arduino.py`, `go.py` |
-| Per-pattern eval | `eval_imu_per_pattern.py` |
+| Recording protocol, pattern list | `src/record_bits.py` |
+| EMG bandpass + notch filter | `src/convert_to_hdf5.py` (`filter_emg`) |
+| Live inference + smoothing pipeline | `src/live_binary.py` (`BinaryPredictor`, `LIVE_INFERENCE_DEFAULTS`) |
+| Live Arduino loop (this is the demo) | `go.py` |
+| Offline smoothing / accuracy comparison | `src/compare_smoothing.py` |
+| Output-noise characterization | `src/analyze_model_noise.py` |
+| Full ground-up walkthrough | `docs/neural-network-deep-dive.md` |
