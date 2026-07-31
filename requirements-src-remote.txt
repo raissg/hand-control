@@ -1,0 +1,14 @@
+# Python deps for `src/` on a Linux GPU box (training, conversion, optional recording).
+# Install PyTorch with CUDA first (pick wheel matching the server driver), for example:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
+#
+pyyaml>=6.0
+tqdm>=4.66
+h5py>=3.10
+numpy>=1.26,<2.1
+pandas>=2.0
+scipy>=1.11
+matplotlib>=3.8
+mediapipe>=0.10.33
+opencv-python>=4.8
+mindrove>=5.2

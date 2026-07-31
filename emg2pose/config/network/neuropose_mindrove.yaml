@@ -1,0 +1,90 @@
+# @package _global_
+dropout_rate: .2
+
+# Pooling and upsampling occurs over [time, channels].
+# Adapted for MindRove 14-channel input (8 EMG + 3 accel + 3 gyro), 500Hz:
+# (Batch, 1, 1000, 14) input shape window.
+#
+# Channel-axis flow through encoder pools [5,2],[5,2],[4,2]:
+#   14 -> 7 -> 3 -> 1
+# Decoder upsamplings [4,4],[5,2],[5,2]:
+#   1 -> 4 -> 8 -> 16
+# Final flatten feeds Linear(16 -> 60).
+
+network:
+  _target_: emg2pose.networks.NeuroPose
+
+  linear_in_channels: 16
+  out_channels: 60
+
+  encoder_blocks:
+  - _target_: emg2pose.networks.EncoderBlock
+    in_channels: 1
+    out_channels: 32
+    kernel_size: [3, 2]
+    max_pool_size: [5, 2]   # T: 1000 -> 200, C: 14 -> 7
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.EncoderBlock
+    in_channels: 32
+    out_channels: 128
+    kernel_size: [3, 2]
+    max_pool_size: [5, 2]   # T: 200 -> 40, C: 7 -> 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.EncoderBlock
+    in_channels: 128
+    out_channels: 256
+    kernel_size: [3, 2]
+    max_pool_size: [4, 2]   # T: 40 -> 10, C: 3 -> 1
+    dropout_rate: ${dropout_rate}
+
+  residual_blocks:
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+
+  decoder_blocks:
+  - _target_: emg2pose.networks.DecoderBlock
+    in_channels: 256
+    out_channels: 128
+    kernel_size: [3, 2]
+    upsampling: [4, 4]   # T: 10 -> 40, C: 1 -> 4
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.DecoderBlock
+    in_channels: 128
+    out_channels: 32
+    kernel_size: [3, 2]
+    upsampling: [5, 2]   # T: 40 -> 200, C: 4 -> 8
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.DecoderBlock
+    in_channels: 32
+    out_channels: 1
+    kernel_size: [3, 2]
+    upsampling: [5, 2]   # T: 200 -> 1000, C: 8 -> 16
+    dropout_rate: ${dropout_rate}

@@ -1,0 +1,57 @@
+# ── Hardware ──────────────────────────────────────────────────
+emg:
+  board: mindrove_wifi          # mindrove_wifi | synthetic
+  ip: "192.168.4.1"
+  port: 4210
+  num_channels: 8
+  sample_rate: 500              # Hz (MindRove native)
+
+camera:
+  device: 0                     # OpenCV camera index
+  fps: 30
+
+# ── Filtering ─────────────────────────────────────────────────
+filter:
+  enable: true
+  bandpass_low: 20.0            # Hz — below is motion artifact
+  bandpass_high: 240.0          # Hz — must be < Nyquist (250 Hz at fs=500)
+  notch: 50.0                   # power-line (measured: 50Hz at this location; 60Hz would leave spike untouched)
+  order: 4
+
+# ── Ground truth ──────────────────────────────────────────────
+ground_truth:
+  method: wilor                 # wilor | mediapipe
+  wilor:
+    root: ./wilor_realtime/WiLoR
+    checkpoint: ./pretrained_models/wilor_final.ckpt
+    config: ./pretrained_models/model_config.yaml
+    detector: ./pretrained_models/detector.pt
+    detector_conf: 0.3
+    rescale_factor: 2.0
+    device: auto                # auto | cpu | cuda | mps
+
+# ── Recording ─────────────────────────────────────────────────
+recording:
+  output_dir: ./recordings
+  session_prefix: session
+
+# ── Dataset ───────────────────────────────────────────────────
+dataset:
+  output_dir: ./data
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+# ── Model ─────────────────────────────────────────────────────
+model:
+  architecture: neuropose       # neuropose | vemg2pose
+  window_length: 1000           # samples (2s at 500 Hz)
+  val_test_window_length: 2500  # samples (5s at 500 Hz)
+  num_joints: 20
+  lr: 0.001
+
+# ── Inference ─────────────────────────────────────────────────
+inference:
+  output_rate: 20               # Hz
+  checkpoint: null              # path to trained .ckpt
+  ema_alpha: 0.3                # smoothing for visualizer

@@ -1,0 +1,83 @@
+# @package _global_
+# NeuroPose, 8ch EMG -> 5 palm-to-finger flexion angles (MCP_FE x4 + thumb CMC_FE).
+# Identical to neuropose_angles.yaml except `out_channels: 5`.
+
+dropout_rate: .05
+
+network:
+  _target_: emg2pose.networks.NeuroPose
+
+  linear_in_channels: 16
+  out_channels: 5
+
+  encoder_blocks:
+  - _target_: emg2pose.networks.EncoderBlock
+    in_channels: 1
+    out_channels: 32
+    kernel_size: [3, 2]
+    max_pool_size: [4, 2]
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.EncoderBlock
+    in_channels: 32
+    out_channels: 128
+    kernel_size: [3, 2]
+    max_pool_size: [5, 2]
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.EncoderBlock
+    in_channels: 128
+    out_channels: 256
+    kernel_size: [3, 2]
+    max_pool_size: [5, 2]
+    dropout_rate: ${dropout_rate}
+
+  residual_blocks:
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.ResidualBlock
+    in_channels: 256
+    out_channels: 256
+    kernel_size: [3, 2]
+    num_convs: 3
+    dropout_rate: ${dropout_rate}
+
+  decoder_blocks:
+  - _target_: emg2pose.networks.DecoderBlock
+    in_channels: 256
+    out_channels: 128
+    kernel_size: [3, 2]
+    upsampling: [5, 2]
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.DecoderBlock
+    in_channels: 128
+    out_channels: 32
+    kernel_size: [3, 2]
+    upsampling: [5, 4]
+    dropout_rate: ${dropout_rate}
+  - _target_: emg2pose.networks.DecoderBlock
+    in_channels: 32
+    out_channels: 1
+    kernel_size: [3, 2]
+    upsampling: [4, 2]
+    dropout_rate: ${dropout_rate}
